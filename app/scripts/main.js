@@ -1,7 +1,7 @@
 /* jshint devel:true */
 (function(){
 	'use strict';
-	var currentVersion = '0.0.3';
+	var currentVersion = '0.0.4';
 	var verticalScrollOpts = {
 	    scrollingX: false,
 	    bouncing: false,
@@ -345,6 +345,8 @@
 				var isTrue = '';
 				var isFalse = '';
 				var listLength = 0;
+				var quizNote;
+				var quizMultipleClass = '';
 				pageExplain = entry.explain || '';
 				if (pageExplain !== '') {
 					pageExplain = '<div class="n-page-explain animated running fadeInLeft">' + pageExplain + '</div>';
@@ -353,14 +355,24 @@
 				if (pagePoint !== '') {
 					pagePoint = '<div class="n-page-point">' + pagePoint + '</div>';
 				}
-				if (entry.pageType === 'quiz') {
-					pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
+				if (entry.pageType === 'quiz' || entry.pageType === 'multiple') {
+				// create single choice quiz and multiple choice quiz
+					quizNote = (entry.pageType === 'multiple') ? '多选：': '';
+					quizMultipleClass = (entry.pageType === 'multiple') ? ' is-multiple': '';
+					pageTitle = '<h3 class="n-page-title">' + quizNote + entry.title + '</h3>';
 					pageMain = '<div class="n-page-lead">' + entry.question + '</div>'; 
 					pageValue = parseInt(entry.value, 10) || 1;
 
-					pageOptions.push('<div class="n-option" value=' + pageValue + '>' + entry.rightanswer + '</div>');
+					if (entry.pageType === 'multiple') {
+						$.each(entry.rightanswer, function(itemIndex, item) {
+							pageOptions.push ('<div class="n-option' + quizMultipleClass + '" value=' + pageValue + '>' + item + '</div>');
+						});
+					} else {
+						pageOptions.push('<div class="n-option" value=' + pageValue + '>' + entry.rightanswer + '</div>');
+					}
+
 					$.each(entry.wronganswer, function(itemIndex, item) {
-						pageOptions.push ('<div class="n-option">' + item + '</div>');
+						pageOptions.push ('<div class="n-option' + quizMultipleClass + '">' + item + '</div>');
 					});
 					if (entry.randomize !== false) {
 						pageOptions = shuffleArray(pageOptions);
@@ -467,7 +479,10 @@
 		if (courseStatus.buttonDisable === true) {
 			return;
 		}
+		var isCorrect;
 		var currentPage = $('.n-page').eq(courseStatus.current);
+		var allOptions;
+		var currentOptions;
 		var currentOption;
 		var currentValue;
 		var currentPoint = '';
@@ -481,12 +496,44 @@
 			}
 			openPage(courseStatus.current);
 		} else if (action === 'confirm') {
-			currentOption = currentPage.find('.n-option.selected,.n-true.selected,.n-false.selected');
+			allOptions = currentPage.find('.n-option');
+			currentOptions = currentPage.find('.n-option.selected,.n-true.selected,.n-false.selected');
+			currentOption = currentOptions.eq(0);
 			currentValue = parseInt(currentOption.attr('value'), 10) || 0;
 			currentPoint = currentPage.find('.n-page-point').html() || '';
-			if (currentOption.attr('value') >= 1) {
+
+			if (currentOption.hasClass('is-multiple')) {
+				// each option of multiple choices need to be validated
+				allOptions.each(function(){
+					// if isCorrect is already set to false, return immediately
+					if ($(this).attr('value')>=1) {
+						$(this).addClass('is-correct animated running tada');
+					} else if ($(this).hasClass('selected')) {
+						$(this).addClass('is-wrong animated running shake');
+					}
+
+					if (isCorrect === false) {
+						return;
+					}
+					if (($(this).hasClass('selected') && $(this).attr('value')>=1) || (!$(this).hasClass('selected') && !$(this).attr('value'))) {
+						isCorrect = true;
+					} else {
+						isCorrect = false;
+					}
+				});
+
+			} else {
+				if (currentOption.attr('value') >= 1) {
+					isCorrect = true;
+				} else {
+					isCorrect = false;
+				}
+			}
+
+
+			if (isCorrect === true) {
 				courseStatus.score += currentValue; 
-				currentOption.addClass('is-correct animated running tada');
+				currentOptions.addClass('is-correct animated running tada');
 				if (currentPoint !== '') {
 					courseStatus.rightPoints.push(currentPoint);
 				}
@@ -494,8 +541,10 @@
 				lostScore = currentPage.find('.n-option[value],.n-true[value],.n-false[value]').attr('value');
 				lostScore = parseInt(lostScore, 10) || 0;
 				courseStatus.lostScore += lostScore;
+				if (!currentOption.hasClass('is-multiple')) {
 				currentOption.addClass('is-wrong animated running shake');
-				currentPage.find('.n-option[value],.n-true[value],.n-false[value]').addClass('is-correct');
+					currentPage.find('.n-option[value],.n-true[value],.n-false[value]').addClass('is-correct');
+				}
 				if (currentPoint !== '') {
 					courseStatus.wrongPoints.push(currentPoint);
 				}
@@ -562,8 +611,12 @@
 		if ($(this).parentsUntil('n-page').parent().hasClass('done') === true) {
 			return;
 		}
-		$(this).parent().find('.n-option,.n-true, .n-false').removeClass('selected');
-		$(this).addClass('selected');
+		if ($(this).hasClass('is-multiple')) {
+			$(this).toggleClass('selected');
+		} else {
+			$(this).parent().find('.n-option,.n-true, .n-false').removeClass('selected');
+			$(this).addClass('selected');
+		}
 		var courseButton = $('#n-course-button');
 		courseButton.html(getCaption('confirm'));
 		courseButton.removeClass('disabled');
@@ -637,7 +690,6 @@
     	}
     });
 
-    console.log ('jaury dfa');
 
 	document.getElementById('n-header-title').innerHTML = getCaption('appTitle'); 
 	document.getElementById('n-header__back').innerHTML = getCaption('back');

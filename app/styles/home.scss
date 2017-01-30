@@ -11,7 +11,7 @@
 	left: 0;
 	right: 0;
 	overflow: hidden;
-	background-color: white;
+	background-color: $contentBG;
 	@include transition(all 0.5s ease-in-out);
 	@include backface-visibility(hidden);
 }

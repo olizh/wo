@@ -167,10 +167,24 @@ gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras', 'api'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
+
 gulp.task('publish', ['build'], () => {
   return gulp.src('dist/**/*')
     .pipe(gulp.dest('../ft/olizh.github.io/'));
 });
+
+gulp.task('ios', ['build'], () => {
+  // android file;
+  var fs = require('fs');
+  var replace = require('gulp-replace');
+  var cssbundle = fs.readFileSync('dist/styles/main.css', 'utf8');
+  var jsbundle = fs.readFileSync('dist/scripts/main.js', 'utf8');
+  gulp.src(['dist/index.html'])
+    .pipe(replace('<link rel="stylesheet" href="styles/main.css">', '<style>'+cssbundle+'</style>' ))
+    .pipe(replace('<script src="scripts/main.js"></script>', '<script>'+jsbundle+'</script>'))
+    .pipe(gulp.dest('../druker/德鲁克学徒/'));
+});
+
 
 gulp.task('default', () => {
   return new Promise(resolve => {
