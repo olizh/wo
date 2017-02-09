@@ -1,0 +1,103 @@
+{
+  "id": "002",
+  "title": "市场营销第二节",
+  "image": "http://lorempixel.com/800/450/business/",
+  "lead": "到了5岁，任何一个胸怀大志的特级大师应该至少已开始学棋",
+  "passMark": 70,
+  "course": "001",
+  "content": [
+    {
+      "title": "填写",
+      "pageType": "input",
+      "inputType": "number",
+      "question": "填空题的题干，请写上“192”三个字？",
+      "rightanswer": "192",
+      "value": "3",
+      "point": "填空题要注意的点"
+    },
+    {
+      "title": "填写",
+      "pageType": "input",
+      "inputType": "text",
+      "question": "填空题的题干，请写上“我懂了”三个字？",
+      "rightanswer": "我懂了",
+      "value": "2",
+      "point": "填空题要注意的点"
+    },
+    {
+      "title": "填写",
+      "pageType": "input",
+      "inputType": "tel",
+      "question": "填空题的题干，请写上“899”三个字？",
+      "rightanswer": "899",
+      "value": "2",
+      "point": "填空题要注意的点"
+    },
+    {
+      "title": "第一页",
+      "pageType": "quiz",
+      "question": "这是问题的题干？",
+      "rightanswer": "这是正确答案",
+      "value": "2",
+      "wronganswer": [
+        "错误选项一",
+        "错误选项二",
+        "错误选项三"
+      ],
+      "point": "第一个要注意的点"
+    },
+    {
+      "title": "第2页",
+      "pageType": "quiz",
+      "question": "多选题的题干？",
+      "rightanswer": [
+        "这是正确答案",
+        "这也是正确答案"
+      ],
+      "value": "2",
+      "wronganswer": [
+        "错误选项一",
+        "错误选项二"
+      ],
+      "point": "第一个要注意的点"
+    },
+    {
+      "title": "第二页",
+      "pageType": "quiz",
+      "question": "这是什么问题2",
+      "value": "wrong value",
+      "rightanswer": "第一个",
+      "wronganswer": [
+        "第二个",
+        "第三个",
+        "第四个"
+      ],
+      "point": "第二个要注意的点"
+    },
+    {
+      "title": "第三页",
+      "pageType": "quiz",
+      "question": "这是什么问题3",
+      "rightanswer": "第一个",
+      "wronganswer": [
+        "第二个",
+        "第三个",
+        "第四个"
+      ],
+      "point": "第三个要注意的点"
+    },
+    {
+      "title": "第四页",
+      "pageType": "quiz",
+      "question": "这是什么问题3",
+      "value": 2,
+      "rightanswer": "第一个",
+      "wronganswer": [
+        "第二个",
+        "第三个",
+        "第四个"
+      ],
+      "point": "第四个要注意的点"
+    }
+  ]
+}

@@ -50,8 +50,9 @@
 	left: 62px;
 }
 .n-header__score {
-	width: $batteryWidth;
+	//width: $batteryWidth;
 	right: $padding;
+	text-align: right;
 	display: none;
 }
 .n-battery-container {

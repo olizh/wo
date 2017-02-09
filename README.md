@@ -3,10 +3,9 @@
 ## Overview
 This is a new app built using the updated version gulp-webapp. 
 
-# 德鲁克门徒
+# 一个管理者的自我修养
 
 ## 用前所未有的体验来学习德鲁克的管理知识，搭建知识体系
-
 
 ## 互动场景
 ### 多选
@@ -15,10 +14,11 @@ This is a new app built using the updated version gulp-webapp.
 ### 填空
 ### 数字选填
 ### 排序
+### JS图表
 
 ## 渠道
-### 打包到iOS原生应用
 ### 快速链接
+### 打包到iOS原生应用
 
 ## 开发
 ### 升级开发环境
@@ -26,5 +26,28 @@ This is a new app built using the updated version gulp-webapp.
 ## 设计
 ### 美化界面
 
-## 下一步
+## 发布单个课程需要的程序改进
+
+
+## 规模化需要的程序改进
 ### 用户创建
+### 主页显示付费情况
+### SVG直接写到CSS里面，不必重复下载
+
+## 已完成
+### 得分显示在横条上，从下面冒出，正确和错误的时候出现相应的鼓励，支持中英文
+### 答案的鼓励有随机性
+### 电池改为分数，更为明确
+### 课程小结的Style改为Div，便于容纳大段的文字
+### 课程小结应该可以点击直接回看
+### 课程小结统一成有标点符号结尾的形式
+### 答案解释应该可以关闭和打开
+### Points 底部的Padding
+### 点击课程时的title显示为undefined
+### 出声音（利用系统声音）
+### 主页显示课程进度
+
+
+## 可以提供意见的人
+### 姜峰、曾开天、李劲、Martin Wolf、Matt Andrews、Andrew Betts、尹望峰、贺嘉、贺斌、陈渝欢、龙平敬、蒋密
+

@@ -61,7 +61,6 @@
 		@include transform(translate3d(100%, 0, 0));
 	}
 }
-
 .n-course-container, .n-course-intro-container {
 	@include transform(translate3d(100%, 0, 0));
 	.n-course-inner, .n-page-inner {
@@ -71,22 +70,34 @@
 		overflow: hidden;
 	}
 }
-
 .n-course-link {
 	cursor: pointer;
 }
-
 .n-chapter-title {
 	font-weight: bold;
 	font-size:1.4em;
 	padding: $padding $padding 0 $padding;
 }
-
 .n-session-title {
 	font-size:1.2em;
-	padding: $padding 2*$padding;
+	padding: 0 2*$padding;
+	line-height: $headerHeight;
 }
-
+.n-session-score {
+	float: right;
+	font-size: 0.85em;
+	line-height: $headerHeight;
+}
+.good {
+	.n-session-score {
+		color: $lighterThemeBG;
+	}
+}
+.bad {
+	.n-session-score {
+		color: red;
+	}
+}
 .n-page {
 	top: $progressHeight;
 	display:none;
@@ -116,15 +127,25 @@ h3.n-page-title {
 .n-page-lead {
 	padding: 0 $padding; 
 	margin-top: 1em;
-	ul {
-		padding-left: 1em;
-		margin: 0;
+	.n-points-container {
+		padding-bottom: $padding;
+	}
+	.n-point {
+		list-style-type: none;
+		padding-left: 0;
+		margin-top: $padding;
+		padding-top: $padding;
+		border-top: 1px solid $borderColorGrey;
+		&.first-child {
+			border-top: medium none;
+			margin-top: 0;
+		}
 	}
 	.n-wrong-point {
 		color: red;
 	}
 	.n-right-point {
-		color: green;
+		//color: green;
 	}
 }
 .n-page-point {
@@ -132,16 +153,35 @@ h3.n-page-title {
 }
 .n-page-explain {
 	position: absolute;
-	bottom: 0;
+	bottom: $padding;
 	width: 100%;
-	background-color: $explainerBG;
-	padding: $gutterWidth;
-	color: white;
 	display: none;
+}
+.n-page-explain-header {
+	position: relative;
+	background-color: $explainerBG;
+	color: white;
+	padding: $gutterWidth;
+	&.is-wrong {
+		background-color: red;
+	}
+}
+.n-page-explain-close {
+	position: absolute;
+	width: $headerHeight;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-image: url(../images/ic_close_24px.svg);
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+}
+.n-page-explain-text {
+	padding: $gutterWidth;
+	background-color: $defaultBG;
 }
 .n-list-container {
 	padding: $padding;
-	//position: relative;
 }
 .n-list {
 
@@ -203,10 +243,10 @@ span.bad {
 	color: white;
 	background-image: url(../images/ic_radio_button_on_24px.svg);
 }
-.n-option.is-correct {
+.is-correct.n-option {
 	background-color: $lighterThemeBG;
 	color: white;
-	background-image: url(../images/ic_radio_white_24px.svg);	
+	background-image: url(../images/ic_radio_white_24px.svg);
 }
 .n-option.selected.is-correct {
 	background-color: $lighterThemeBG;
@@ -274,6 +314,28 @@ span.bad {
 	border-width: 0 0 0 1px;
 	@include vendor-prefix("border-radius", "0 50px 50px 0");
 }
+
+.n-input-container {
+	padding: 2*$padding $padding 0 $padding;
+}
+.n-input {
+	width: 100%;
+	height: $headerHeight;
+	font-size: 1.2em;
+	padding: $padding;
+	&.is-correct {
+		background-color: $lighterThemeBG;
+		border: medium none;
+		color: white;
+	}
+	&.is-wrong {
+		background-color: red;
+		border: medium none;
+		color: white;	
+	}
+}
+
+
 .n-course-button-container {
 	position: absolute;
 	bottom: 0;
