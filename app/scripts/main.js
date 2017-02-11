@@ -885,8 +885,37 @@
 	});
 
 
+
+	// getAPI('api/index.json', function(data){
+	// 	console.log('data is: ');
+ //        console.log(data);
+ //    });
+
+
+    function getAPI(apiUrl, callback){
+        //console.log (callback.toString().replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'').match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1].split(/,/));
+
+        if(typeof callback == 'function') {
+        	if (webViewType === 'wkwebview') {
+        		webkit.messageHandlers.jsapi.postMessage(apiUrl);
+        		setTimeout(function(){
+        			//var jsAPIData = JSON.parse(jsAPIString);
+        			callback(window.jsAPIData);
+        		}, 300);
+        	} else {
+	        	$.get(apiUrl, function(data) {
+	        		callback(data);	
+	        	});
+        	}
+        }
+    }
+
+
+
+
 	// get JSON data for home page
-    $.get('api/index.json', function(data) {
+    //$.get('api/index.json', function(data) {
+    getAPI('api/index.json', function(data) {
     	var startScreen = document.getElementById('start-screen'),
     		homeContent = '';
     	if (typeof data === 'object') {

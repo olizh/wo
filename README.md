@@ -27,12 +27,12 @@ This is a new app built using the updated version gulp-webapp.
 ### 美化界面
 
 ## 发布单个课程需要的程序改进
-
+### 从原生程序的bundle里面加载JSON
+### SVG直接写到CSS里面，不必重复下载
 
 ## 规模化需要的程序改进
 ### 用户创建
 ### 主页显示付费情况
-### SVG直接写到CSS里面，不必重复下载
 
 ## 已完成
 ### 得分显示在横条上，从下面冒出，正确和错误的时候出现相应的鼓励，支持中英文
