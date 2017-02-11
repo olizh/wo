@@ -183,6 +183,8 @@ gulp.task('ios', ['build'], () => {
     .pipe(replace('<link rel="stylesheet" href="styles/main.css">', '<style>'+cssbundle+'</style>' ))
     .pipe(replace('<script src="scripts/main.js"></script>', '<script>'+jsbundle+'</script>'))
     .pipe(gulp.dest('../druker/德鲁克学徒/'));
+  gulp.src('dist/**/*')
+    .pipe(gulp.dest('../druker/德鲁克学徒/dist'));
 });
 
 
