@@ -121,10 +121,7 @@
 	};
 
 
-	var gAppRoot=window.location.href;
-	gAppRoot=gAppRoot.replace(/course=[^&]+/g,'').replace(/session=[^&]+/g,'');
-	gAppRoot = gAppRoot + (gAppRoot.indexOf('?')>=0) ? '?isWebApp':'';
-	//console.log (gAppRoot);
+
 
 	// if url has isInSWIFT
 	// display extra 20px 
@@ -133,6 +130,19 @@
 		document.getElementsByTagName('HTML')[0].classList.add('is-in-swift');
 		webViewType = 'wkwebview';
 	}
+
+
+	var gAppRoot=window.location.href;
+	gAppRoot = gAppRoot
+		.replace(/course=[^&]+/g,'')
+		.replace(/session=[^&]+/g,'')
+		.replace(/#.*$/g,'')
+		.replace(/\&+$/g,'');
+	if (gAppRoot.indexOf('?')<0) {
+		gAppRoot += '?isWebApp';
+	}
+	console.log (gAppRoot);
+
 
 	// initiate fast click
 	if ('addEventListener' in document) {
@@ -181,6 +191,39 @@
 	        return true;
 	    }
 	}
+
+	// get api from wkwebview first, if it doesn't work, fall back to web
+    function getAPI(apiUrl, callback, errorHandler){
+    	var errorType = 'unknown';
+        if(typeof callback == 'function') {
+        	if (webViewType === 'wkwebview') {
+        		window.jsAPIData = undefined;
+        		try {
+        			webkit.messageHandlers.jsapi.postMessage(apiUrl);
+	        		setTimeout(function(){
+	        			//var jsAPIData = JSON.parse(jsAPIString);
+	        			if (typeof jsAPIData === 'object') {
+	        				callback(window.jsAPIData);
+	        			} else {
+				        	$.get(apiUrl, function(data) {
+				        		callback(data);	
+				        	}).fail(errorHandler);
+	        			}
+	        		}, 300);
+        		} catch (err) {
+        			console.log (err);
+		        	$.get(apiUrl, function(data) {
+		        		callback(data);	
+		        	}).fail(errorHandler);
+        		}
+        	} else {
+	        	$.get(apiUrl, function(data) {
+	        		callback(data);	
+	        	}).fail(errorHandler);
+        	}
+        }
+    }
+
 
 
 	function playNativeSoundEffect(effect) {
@@ -390,7 +433,9 @@
 		}
 		document.body.className = 'n-in-course-intro';
 
-		$.get(apiUrl, function(data) {
+		getAPI(
+			apiUrl, 
+			function(data) {
 			var courseHTML = '';
 			courseStatus.courseIntro = data;
 			chapterCount = data.content.length;
@@ -427,7 +472,8 @@
 				//no need to see the course introduction
 				openSession(data.content[0].sessions[0].id, data.content[0].sessions[0].title);
 			}
-		}).fail(
+		},
+			// handle error
 			function () {
 				document.getElementById('n-course-intro-inner').innerHTML = '<div class="n-loading">加载失败，可能是我们的服务器不给力，也可能是您的网络不给力。</div>';
 			}
@@ -457,146 +503,154 @@
 		courseStatus.currentSession = id;
 		document.getElementById('n-course-button').innerHTML = getCaption('start');
 		document.body.className = 'n-in-course';
-		$.get(apiUrl, function(data) {
-			var courseHTML = '';
-			var progressHTML = '';
-			var courseImage = '';
-			var courseUrl = 'api/courses/course' + data.course + '/index.json';
-			//initialize courseStatus
-			courseStatus.len = 0;
-			courseStatus.score = 0;
-			courseStatus.lostScore = 0;
-			courseStatus.fullScore = 0;
-			courseStatus.allPoints = [];
-			courseStatus.courseId = data.course;
-			document.getElementById('n-header-title').innerHTML = data.title;
-			if (data.image && data.image !== '') {
-				courseImage = '<div class="n-page-image-container"><div class="n-page-image-inner" style="background-image: url(' + data.image + ')"></div></div>';
-			}
-			if (data.passMark && data.passMark !== '') {
-				courseStatus.passMark = parseInt(data.passMark, 10) || 60; 
-			}
-			courseHTML = '<div class="n-page n-page-start n-page-on"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + courseImage + '<h1 class="n-page-title">' + data.title + '</h1><div class="n-page-lead">' + data.lead + '</div></div></div></div></div>';
-			courseStatus.len += 1;
-			$.each(data.content, function(entryIndex, entry) {
-				var pageTitle = '';
-				var pageMain = '';
-				var pageOption = '';
-				var pageOptions = [];
-				var pageList = '';
-				var pageValue = 0; 
-				var pagePoint = '';
-				var pageExplain = '';
-				var pageImage = '';
-				var isTrue = '';
-				var isFalse = '';
-				var listLength = 0;
-				var quizNote;
-				var quizMultipleClass = '';
-				var isMultiple = false;
-				var inputType = '';
-				pageExplain = entry.explain || '';
-				//if (pageExplain !== '') {
-					pageExplain = '<div class="n-page-explain animated running fadeInUp"><div class="n-page-explain-header"><div class="n-page-explain-close"></div><div class="n-page-explain-header-text"></div></div><div class="n-page-explain-text">' + pageExplain + '</div></div>';
-				//}
-				pagePoint = entry.point || '';
-				if (pagePoint !== '') {
-					pagePoint = '<div class="n-page-point">' + pagePoint + '</div>';
+		getAPI(
+			apiUrl, 
+			function(data) {
+				var courseHTML = '';
+				var progressHTML = '';
+				var courseImage = '';
+				var courseUrl = 'api/courses/course' + data.course + '/index.json';
+				//initialize courseStatus
+				courseStatus.len = 0;
+				courseStatus.score = 0;
+				courseStatus.lostScore = 0;
+				courseStatus.fullScore = 0;
+				courseStatus.allPoints = [];
+				courseStatus.courseId = data.course;
+				document.getElementById('n-header-title').innerHTML = data.title;
+				if (data.image && data.image !== '') {
+					courseImage = '<div class="n-page-image-container"><div class="n-page-image-inner" style="background-image: url(' + data.image + ')"></div></div>';
 				}
-				if (entry.pageType === 'quiz') {
-				// create single choice quiz and multiple choice quiz
-					if (typeof entry.rightanswer === 'object') {
-						isMultiple = true;
-					}
-					quizNote = (isMultiple === true) ? '多选：': '';
-					quizMultipleClass = (isMultiple === true) ? ' is-multiple': '';
-					pageTitle = '<h3 class="n-page-title">' + quizNote + entry.title + '</h3>';
-					pageMain = '<div class="n-page-lead">' + entry.question + '</div>'; 
-					pageValue = parseInt(entry.value, 10) || 1;
-
-					if (isMultiple === true) {
-						$.each(entry.rightanswer, function(itemIndex, item) {
-							pageOptions.push ('<div class="n-option' + quizMultipleClass + '" value=' + pageValue + '>' + item + '</div>');
-						});
-					} else {
-						pageOptions.push('<div class="n-option" value=' + pageValue + '>' + entry.rightanswer + '</div>');
-					}
-
-					$.each(entry.wronganswer, function(itemIndex, item) {
-						pageOptions.push ('<div class="n-option' + quizMultipleClass + '">' + item + '</div>');
-					});
-					if (entry.randomize !== false) {
-						pageOptions = shuffleArray(pageOptions);
-					}
-					$.each(pageOptions, function(itemIndex, item) {
-						pageOption += item;
-					});
-					pageOption = '<div class="n-option-container">' + pageOption + '</div>'; 
-					courseHTML += '<div class="n-page n-page-quiz"><div class="n-page-inner n-overflow-scroll-y"><div class="n-overflow-scroll-y-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div>';
-				} else if (entry.pageType === 'trueOrFalse') {
-					isTrue = '';
-					isFalse = '';
-					pageValue = parseInt(entry.value, 10) || 1;
-					if (entry.rightanswer === true) {
-						isTrue = ' value=' + pageValue;
-					} else {
-						isFalse = ' value=' + pageValue;
-					}
-					pageTitle = '<h3 class="n-page-title">' + getCaption('trueOrFalse') + '</h3>';
-					pageMain = '<div class="n-page-lead">' + entry.question + '</div>'; 
-					pageOption = '<div class="n-true"' + isTrue + '>' + getCaption('trueStatement') + '</div><div class="n-false"' + isFalse + '>' + getCaption('falseStatement') + '</div>';
-					pageOption = '<div class="n-true-false-container">' + pageOption + '</div>'; 
-					courseHTML += '<div class="n-page n-page-true-false"><div class="n-page-inner"><div class="n-card-container"><div class="n-card-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div></div>';
-				} else if (entry.pageType === 'list') {
-					pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
-					pageMain = '<div class="n-page-lead">' + entry.text + '</div>';
-					pageList = '';
-					listLength = entry.list.length;
-					//console.log (listLength);
-					$.each(entry.list, function(itemIndex, item) {
-						pageList += '<div class="n-list"><div class="n-list-title">' + item.title + '</div><div class="n-list-text-container animated running fadeIn"><div class="n-list-text-inner">' + item.text + '</div></div></div>';
-					});
-					pageList = '<div class="n-list-container">' + pageList + '</div>';
-					courseHTML += '<div class="n-page"><div class="n-page-inner n-overflow-scroll-y n-overflow-scroll-force"><div class="n-overflow-scroll-y-inner">' + pageTitle + pageMain + pageList + '</div></div></div>';
-				} else if (entry.pageType === 'image-text') {
-					pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
-					pageMain = '<div class="n-page-lead">' + entry.text + '</div>';
-					if (entry.image && entry.image !== '') {
-						pageImage = '<div class="n-home-course-container"><div class="n-home-course-inner" style="background-image: url(' + entry.image + ')"></div></div>';
-					} 
-					courseHTML += '<div class="n-page"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + pageImage + pageTitle + pageMain + '</div></div></div></div>';
-				} else if (entry.pageType === 'input') {
-					pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
-					pageMain = '<div class="n-page-lead">' + entry.question + '</div>';
-					pageValue = parseInt(entry.value, 10) || 1;
-					inputType = entry.inputType || 'text';
-					pageOption = '<div class="n-input-container"><input class="n-input" type="' + inputType + '" answer="'+ entry.rightanswer +'" score="'+ entry.value +'"></div>';
-					courseHTML += '<div class="n-page n-page-input"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div></div>';
+				if (data.passMark && data.passMark !== '') {
+					courseStatus.passMark = parseInt(data.passMark, 10) || 60; 
 				}
-				courseStatus.fullScore += pageValue;
+				courseHTML = '<div class="n-page n-page-start n-page-on"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + courseImage + '<h1 class="n-page-title">' + data.title + '</h1><div class="n-page-lead">' + data.lead + '</div></div></div></div></div>';
 				courseStatus.len += 1;
-				// course progress bar
-				progressHTML += '<div class="n-progress" pageNum=' + entryIndex + '></div>';
-			});
-			courseHTML += '<div class="n-page n-page-last"><div class="n-page-inner n-overflow-scroll-y"><div class="n-overflow-scroll-y-inner"><h3 class="n-page-title"></h3><div class="n-page-lead"></div></div></div></div>';
-			progressHTML += '<div class="n-progress" pageNum=' + (courseStatus.len -1) + '></div>';
-			courseStatus.len += 1;
-			document.getElementById('n-course-inner').innerHTML = courseHTML;
-			document.getElementById('n-progress-inner').innerHTML = progressHTML;
-			document.getElementById('n-header__score').innerHTML = '0/'+courseStatus.fullScore;
-			openPage(0);
-			// if the session courseID doesn't match the current courseID
-			// load it from url
-			// otherwise use data in the memory
-			if (courseStatus.courseIntro.courseId === data.course) {
-				getNextSession(courseStatus.courseIntro, id);
-			} else {
-				$.get(courseUrl, function(data) {
-					getNextSession(data, id);
+				$.each(data.content, function(entryIndex, entry) {
+					var pageTitle = '';
+					var pageMain = '';
+					var pageOption = '';
+					var pageOptions = [];
+					var pageList = '';
+					var pageValue = 0; 
+					var pagePoint = '';
+					var pageExplain = '';
+					var pageImage = '';
+					var isTrue = '';
+					var isFalse = '';
+					var listLength = 0;
+					var quizNote;
+					var quizMultipleClass = '';
+					var isMultiple = false;
+					var inputType = '';
+					pageExplain = entry.explain || '';
+					//if (pageExplain !== '') {
+						pageExplain = '<div class="n-page-explain animated running fadeInUp"><div class="n-page-explain-header"><div class="n-page-explain-close"></div><div class="n-page-explain-header-text"></div></div><div class="n-page-explain-text">' + pageExplain + '</div></div>';
+					//}
+					pagePoint = entry.point || '';
+					if (pagePoint !== '') {
+						pagePoint = '<div class="n-page-point">' + pagePoint + '</div>';
+					}
+					if (entry.pageType === 'quiz') {
+					// create single choice quiz and multiple choice quiz
+						if (typeof entry.rightanswer === 'object') {
+							isMultiple = true;
+						}
+						quizNote = (isMultiple === true) ? '多选：': '';
+						quizMultipleClass = (isMultiple === true) ? ' is-multiple': '';
+						pageTitle = '<h3 class="n-page-title">' + quizNote + entry.title + '</h3>';
+						pageMain = '<div class="n-page-lead">' + entry.question + '</div>'; 
+						pageValue = parseInt(entry.value, 10) || 1;
+
+						if (isMultiple === true) {
+							$.each(entry.rightanswer, function(itemIndex, item) {
+								pageOptions.push ('<div class="n-option' + quizMultipleClass + '" value=' + pageValue + '>' + item + '</div>');
+							});
+						} else {
+							pageOptions.push('<div class="n-option" value=' + pageValue + '>' + entry.rightanswer + '</div>');
+						}
+
+						$.each(entry.wronganswer, function(itemIndex, item) {
+							pageOptions.push ('<div class="n-option' + quizMultipleClass + '">' + item + '</div>');
+						});
+						if (entry.randomize !== false) {
+							pageOptions = shuffleArray(pageOptions);
+						}
+						$.each(pageOptions, function(itemIndex, item) {
+							pageOption += item;
+						});
+						pageOption = '<div class="n-option-container">' + pageOption + '</div>'; 
+						courseHTML += '<div class="n-page n-page-quiz"><div class="n-page-inner n-overflow-scroll-y"><div class="n-overflow-scroll-y-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div>';
+					} else if (entry.pageType === 'trueOrFalse') {
+						isTrue = '';
+						isFalse = '';
+						pageValue = parseInt(entry.value, 10) || 1;
+						if (entry.rightanswer === true) {
+							isTrue = ' value=' + pageValue;
+						} else {
+							isFalse = ' value=' + pageValue;
+						}
+						pageTitle = '<h3 class="n-page-title">' + getCaption('trueOrFalse') + '</h3>';
+						pageMain = '<div class="n-page-lead">' + entry.question + '</div>'; 
+						pageOption = '<div class="n-true"' + isTrue + '>' + getCaption('trueStatement') + '</div><div class="n-false"' + isFalse + '>' + getCaption('falseStatement') + '</div>';
+						pageOption = '<div class="n-true-false-container">' + pageOption + '</div>'; 
+						courseHTML += '<div class="n-page n-page-true-false"><div class="n-page-inner"><div class="n-card-container"><div class="n-card-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div></div>';
+					} else if (entry.pageType === 'list') {
+						pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
+						pageMain = '<div class="n-page-lead">' + entry.text + '</div>';
+						pageList = '';
+						listLength = entry.list.length;
+						//console.log (listLength);
+						$.each(entry.list, function(itemIndex, item) {
+							pageList += '<div class="n-list"><div class="n-list-title">' + item.title + '</div><div class="n-list-text-container animated running fadeIn"><div class="n-list-text-inner">' + item.text + '</div></div></div>';
+						});
+						pageList = '<div class="n-list-container">' + pageList + '</div>';
+						courseHTML += '<div class="n-page"><div class="n-page-inner n-overflow-scroll-y n-overflow-scroll-force"><div class="n-overflow-scroll-y-inner">' + pageTitle + pageMain + pageList + '</div></div></div>';
+					} else if (entry.pageType === 'image-text') {
+						pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
+						pageMain = '<div class="n-page-lead">' + entry.text + '</div>';
+						if (entry.image && entry.image !== '') {
+							pageImage = '<div class="n-home-course-container"><div class="n-home-course-inner" style="background-image: url(' + entry.image + ')"></div></div>';
+						} 
+						courseHTML += '<div class="n-page"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + pageImage + pageTitle + pageMain + '</div></div></div></div>';
+					} else if (entry.pageType === 'input') {
+						pageTitle = '<h3 class="n-page-title">' + entry.title + '</h3>';
+						pageMain = '<div class="n-page-lead">' + entry.question + '</div>';
+						pageValue = parseInt(entry.value, 10) || 1;
+						inputType = entry.inputType || 'text';
+						pageOption = '<div class="n-input-container"><input class="n-input" type="' + inputType + '" answer="'+ entry.rightanswer +'" score="'+ entry.value +'"></div>';
+						courseHTML += '<div class="n-page n-page-input"><div class="n-page-inner n-overflow-scroll-y"><div class="n-card-container n-overflow-scroll-y-inner"><div class="n-card-inner">' + pageTitle + pageMain + pageOption + pagePoint + pageExplain + '</div></div></div></div>';
+					}
+					courseStatus.fullScore += pageValue;
+					courseStatus.len += 1;
+					// course progress bar
+					progressHTML += '<div class="n-progress" pageNum=' + entryIndex + '></div>';
 				});
-			}
-		}).fail(
-			function () {
+				courseHTML += '<div class="n-page n-page-last"><div class="n-page-inner n-overflow-scroll-y"><div class="n-overflow-scroll-y-inner"><h3 class="n-page-title"></h3><div class="n-page-lead"></div></div></div></div>';
+				progressHTML += '<div class="n-progress" pageNum=' + (courseStatus.len -1) + '></div>';
+				courseStatus.len += 1;
+				document.getElementById('n-course-inner').innerHTML = courseHTML;
+				document.getElementById('n-progress-inner').innerHTML = progressHTML;
+				document.getElementById('n-header__score').innerHTML = '0/'+courseStatus.fullScore;
+				openPage(0);
+				// if the session courseID doesn't match the current courseID
+				// load it from url
+				// otherwise use data in the memory
+				if (courseStatus.courseIntro.courseId === data.course) {
+					getNextSession(courseStatus.courseIntro, id);
+				} else {
+					getAPI(
+						courseUrl, 
+						function(data) {
+							getNextSession(data, id);
+						},
+						function() {
+							document.getElementById('n-course-inner').innerHTML = '<div class="n-loading">加载失败，可能是我们的服务器不给力，也可能是您的网络不给力。</div>';
+						}
+					);
+				}
+			},
+			function () { // handle error
 				document.getElementById('n-course-inner').innerHTML = '<div class="n-loading">加载失败，可能是我们的服务器不给力，也可能是您的网络不给力。</div>';
 			}
 		);
@@ -884,84 +938,60 @@
 		}
 	});
 
-
-
-	// getAPI('api/index.json', function(data){
-	// 	console.log('data is: ');
- //        console.log(data);
- //    });
-
-
-    function getAPI(apiUrl, callback){
-        //console.log (callback.toString().replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s))/mg,'').match(/^function\s*[^\(]*\(\s*([^\)]*)\)/m)[1].split(/,/));
-
-        if(typeof callback == 'function') {
-        	if (webViewType === 'wkwebview') {
-        		webkit.messageHandlers.jsapi.postMessage(apiUrl);
-        		setTimeout(function(){
-        			//var jsAPIData = JSON.parse(jsAPIString);
-        			callback(window.jsAPIData);
-        		}, 300);
-        	} else {
-	        	$.get(apiUrl, function(data) {
-	        		callback(data);	
-	        	});
-        	}
-        }
-    }
-
-
-
-
 	// get JSON data for home page
-    //$.get('api/index.json', function(data) {
-    getAPI('api/index.json', function(data) {
-    	var startScreen = document.getElementById('start-screen'),
-    		homeContent = '';
-    	if (typeof data === 'object') {
-	    	$.each(data, function(entryIndex, entry) {
-	    		var bgClass;
-	    		var innerClass;
-	    		var sClass;
-	    		var sMod;
-	    		var mClass;
-	    		var mMod;
-	    		var lClass;
-	    		var lMod;
-	    		var containerClass;
-	    		var clearFloat;
-	    		bgClass = 'n-home-course-green';
-	    		innerClass = 'n-home-course-inner ' + bgClass;
-	    		sMod = entryIndex % 8;
-	    		sClass = 's-' + sMod;
-	    		mMod = entryIndex % 16;
-	    		mClass = 'm-' + mMod;
-	    		lMod = entryIndex % 16;
-	    		lClass = 'l-' + lMod;
-	    		containerClass = 'n-home-course-container ' + sClass + ' ' + mClass + ' ' + lClass;
-	    		clearFloat = '<div class="clearfloat ' + sClass + ' ' + mClass + ' ' + lClass + '"></div>'; 
-	    		homeContent += '<a course-id="course/' + entry.id + '" title="' + entry.title + '" class="n-course-link"><div class="' + containerClass + '"><div class="' + innerClass + '" /*style="background-image: url(' +  entry.image + '?'+ entry.id + ')"*/><div class="n-home-course-title">' + entry.title + '</div></div></div></a>' + clearFloat;
-		        startScreen.className = 'start-screen fadeOut animated running';
-	        });
-			homeContent += '<div class="n-version">版本号：' + currentVersion + '</div>';
-	        document.getElementById('home-content').innerHTML = homeContent;
-			gHomePageScroller = new FTScroller(document.getElementById('home-content-scroller'), verticalScrollOpts);
-	        setTimeout (function(){
-	        	startScreen.parentNode.removeChild(startScreen);
-	        },1000);
+    getAPI(
+    	'api/index.json', 
+	    function(data) {
+	    	var startScreen = document.getElementById('start-screen'),
+	    		homeContent = '';
+	    	if (typeof data === 'object') {
+		    	$.each(data, function(entryIndex, entry) {
+		    		var bgClass;
+		    		var innerClass;
+		    		var sClass;
+		    		var sMod;
+		    		var mClass;
+		    		var mMod;
+		    		var lClass;
+		    		var lMod;
+		    		var containerClass;
+		    		var clearFloat;
+		    		bgClass = 'n-home-course-green';
+		    		innerClass = 'n-home-course-inner ' + bgClass;
+		    		sMod = entryIndex % 8;
+		    		sClass = 's-' + sMod;
+		    		mMod = entryIndex % 16;
+		    		mClass = 'm-' + mMod;
+		    		lMod = entryIndex % 16;
+		    		lClass = 'l-' + lMod;
+		    		containerClass = 'n-home-course-container ' + sClass + ' ' + mClass + ' ' + lClass;
+		    		clearFloat = '<div class="clearfloat ' + sClass + ' ' + mClass + ' ' + lClass + '"></div>'; 
+		    		homeContent += '<a course-id="course/' + entry.id + '" title="' + entry.title + '" class="n-course-link"><div class="' + containerClass + '"><div class="' + innerClass + '" /*style="background-image: url(' +  entry.image + '?'+ entry.id + ')"*/><div class="n-home-course-title">' + entry.title + '</div></div></div></a>' + clearFloat;
+			        startScreen.className = 'start-screen fadeOut animated running';
+		        });
+				homeContent += '<div class="n-version">版本号：' + currentVersion + '</div>';
+		        document.getElementById('home-content').innerHTML = homeContent;
+				gHomePageScroller = new FTScroller(document.getElementById('home-content-scroller'), verticalScrollOpts);
+		        setTimeout (function(){
+		        	startScreen.parentNode.removeChild(startScreen);
+		        },1000);
 
-	        // quick link for a course or session
-	        var courseIdInUrl = getpvalue(window.location.href, 'course');
-	        if (courseIdInUrl !== '') {
-	        	openCourse('course/' + courseIdInUrl, '');
-	        	var sessionIdInUrl = getpvalue(window.location.href, 'session');
-	        	if (sessionIdInUrl !== '') {
-	        		openSession(sessionIdInUrl);
-	        	}
-	        }
-    	}
-    });
-
+		        // quick link for a course or session
+		        var courseIdInUrl = getpvalue(window.location.href, 'course');
+		        if (courseIdInUrl !== '') {
+		        	openCourse('course/' + courseIdInUrl, '');
+		        	var sessionIdInUrl = getpvalue(window.location.href, 'session');
+		        	if (sessionIdInUrl !== '') {
+		        		openSession(sessionIdInUrl);
+		        	}
+		        }
+	    	}
+	    },
+	    function() { // handle api request error
+	    	var startScreen = document.getElementById('start-screen');
+	    	startScreen.innerHTML = '<div class="start-screen-warning">网络连接失败</div>';
+	    }
+    );
 
 	document.getElementById('n-header-title').innerHTML = getCaption('appTitle'); 
 	document.getElementById('n-header__back').innerHTML = getCaption('back');

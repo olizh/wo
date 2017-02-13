@@ -27,7 +27,6 @@ This is a new app built using the updated version gulp-webapp.
 ### 美化界面
 
 ## 发布单个课程需要的程序改进
-### 从原生程序的bundle里面加载JSON
 ### SVG直接写到CSS里面，不必重复下载
 
 ## 规模化需要的程序改进
@@ -46,7 +45,7 @@ This is a new app built using the updated version gulp-webapp.
 ### 点击课程时的title显示为undefined
 ### 出声音（利用系统声音）
 ### 主页显示课程进度
-
+### 优先从原生程序的bundle里面加载JSON，Fallback到网络，处理.fail
 
 ## 可以提供意见的人
 ### 姜峰、曾开天、李劲、Martin Wolf、Matt Andrews、Andrew Betts、尹望峰、贺嘉、贺斌、陈渝欢、龙平敬、蒋密

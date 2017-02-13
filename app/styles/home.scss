@@ -172,7 +172,6 @@ h3.n-page-title {
 	right: 0;
 	top: 0;
 	bottom: 0;
-	background-image: url(../images/ic_close_24px.svg);
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 }
@@ -197,7 +196,6 @@ h3.n-page-title {
 .n-list.done .n-list-title {
 	background-size: 48px 48px;
 	background-position: right center;
-	background-image: url(../images/ic_check_24px.svg);	
 	background-repeat: no-repeat;
 }
 .n-list-text-container {
@@ -234,31 +232,26 @@ span.bad {
 	padding: $padding $padding $padding $optionIconWidth + 2 * $padding;
 	background-repeat: no-repeat;
 	background-position: $padding center;
-	background-image: url(../images/ic_radio_button_off_24px.svg);
 	background-size: $optionIconWidth $optionIconWidth;
 	cursor: pointer;
 }
 .n-option.selected {
 	background-color: $selectedBG;
 	color: white;
-	background-image: url(../images/ic_radio_button_on_24px.svg);
 }
 .is-correct.n-option {
 	background-color: $lighterThemeBG;
 	color: white;
-	background-image: url(../images/ic_radio_white_24px.svg);
 }
 .n-option.selected.is-correct {
 	background-color: $lighterThemeBG;
 	background-size: 48px 48px;
 	background-position: 0 center;
-	background-image: url(../images/ic_check_24px.svg);	
 }
 .n-option.selected.is-wrong {
 	background-color: red;
 	background-size: 48px 48px;
 	background-position: 0 center;
-	background-image: url(../images/ic_close_24px.svg);	
 }
 .n-page-true-false {
 	.n-page-explain {
@@ -273,7 +266,6 @@ span.bad {
 	right: 0;
 	bottom: $padding;
 	padding: 0 $padding;
-	//background-color: $trueBG;
 }
 .n-true, .n-false {
 	width:100px;
@@ -288,9 +280,6 @@ span.bad {
 	background-position: $gutterWidth $gutterWidth;
 	color: white;
 }
-.n-true.selected, .n-false.selected {
-	background-image: url(../images/ic_check_24px.svg);
-}
 .n-true.selected {
 	background-position: right 5px top 5px;
 }
@@ -302,7 +291,6 @@ span.bad {
 }
 .n-true.selected.is-wrong, .n-false.selected.is-wrong {
 	background-color: red;
-	background-image: url(../images/ic_close_24px.svg);	
 }
 .n-true {
 	float: left; 
