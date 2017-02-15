@@ -1,9 +1,17 @@
 # Wo Academy
 
+## 发布单个课程需要的程序改进
+### 分享
+
+## 规模化需要的程序改进
+### 用户创建
+### 主页显示付费情况
+
+
 ## Overview
 This is a new app built using the updated version gulp-webapp. 
 
-# 一个管理者的自我修养
+# 一个管理者的自我修养、德鲁克时间
 
 ## 用前所未有的体验来学习德鲁克的管理知识，搭建知识体系
 
@@ -20,18 +28,12 @@ This is a new app built using the updated version gulp-webapp.
 ### 快速链接
 ### 打包到iOS原生应用
 
+
 ## 开发
 ### 升级开发环境
 
 ## 设计
 ### 美化界面
-
-## 发布单个课程需要的程序改进
-### SVG直接写到CSS里面，不必重复下载
-
-## 规模化需要的程序改进
-### 用户创建
-### 主页显示付费情况
 
 ## 已完成
 ### 得分显示在横条上，从下面冒出，正确和错误的时候出现相应的鼓励，支持中英文
@@ -46,6 +48,9 @@ This is a new app built using the updated version gulp-webapp.
 ### 出声音（利用系统声音）
 ### 主页显示课程进度
 ### 优先从原生程序的bundle里面加载JSON，Fallback到网络，处理.fail
+### SVG直接写到CSS里面，不必重复下载
+### 创建谷歌分析账号
+### 跟踪openpage的pv
 
 ## 可以提供意见的人
 ### 姜峰、曾开天、李劲、Martin Wolf、Matt Andrews、Andrew Betts、尹望峰、贺嘉、贺斌、陈渝欢、龙平敬、蒋密

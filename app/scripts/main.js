@@ -136,12 +136,13 @@
 	gAppRoot = gAppRoot
 		.replace(/course=[^&]+/g,'')
 		.replace(/session=[^&]+/g,'')
+		.replace(/page=[^&]+/g,'')
 		.replace(/#.*$/g,'')
 		.replace(/\&+$/g,'');
 	if (gAppRoot.indexOf('?')<0) {
-		gAppRoot += '?isWebApp';
+		gAppRoot += '?isWebApp=true';
 	}
-	console.log (gAppRoot);
+	// console.log (gAppRoot);
 
 
 	// initiate fast click
@@ -192,6 +193,21 @@
 	    }
 	}
 
+	function trackUrl(url) {
+		setTimeout (function(){
+			if (historyAPI() === true) {
+			    window.history.pushState(null, null, url);
+			    var gaUrl = url.replace (/^[a-z]{4,5}\:\/{2}[a-z]{1,}\:[0-9]{1,4}./, '')
+			    				.replace(/^[a-z]{4,5}\:\/{2}[^/]+/,'');
+			    //console.log (gaUrl);
+			    if (document.getElementById('n-header-title')){
+			    	document.title = document.getElementById('n-header-title').innerHTML.replace(/<div.*<\/div>/g,'');
+				}
+			    ga('send', 'pageview', gaUrl);
+			}		
+		}, 10);
+	}
+
 	// get api from wkwebview first, if it doesn't work, fall back to web
     function getAPI(apiUrl, callback, errorHandler){
     	var errorType = 'unknown';
@@ -211,7 +227,7 @@
 	        			}
 	        		}, 300);
         		} catch (err) {
-        			console.log (err);
+        			// console.log (err);
 		        	$.get(apiUrl, function(data) {
 		        		callback(data);	
 		        	}).fail(errorHandler);
@@ -259,24 +275,21 @@
 		}
 	}
 
+
 	function closeButton() {
 		if (courseStatus.page === 'session' && courseStatus.hasSingleSession === false) { 
 			courseStatus.page = 'course';
 			courseStatus.current = 0;
 			document.body.className = 'n-in-course-intro';
 			document.getElementById('n-header-title').innerHTML = courseStatus.courseTitle;
-			if (historyAPI() === true) {
-		       	window.history.pushState(null, null, gAppRoot + '&course=' + courseStatus.courseId);
-			}
+			trackUrl(gAppRoot + '&course=' + courseStatus.courseId);
 		} else {
 			// back to home page
 			courseStatus.page = '';
 			document.body.className = '';
 			document.getElementById('n-header-title').innerHTML = getCaption('appTitle');
 			// update the url to display 
-			if (historyAPI() === true) {
-		       	window.history.pushState(null, null, gAppRoot);
-			}
+			trackUrl(gAppRoot);
 		}
 	}
 
@@ -307,6 +320,8 @@
 		progressBar.removeClass('on');
 		progressBar.slice(0, page).addClass('on done');
 		courseStatus.current = page;
+		//console.log (courseStatus);
+		trackUrl(gAppRoot + '&course=' + courseStatus.courseId + '&session=' + courseStatus.currentSession + '&page=' + page);
 		allPages.removeClass('n-page-on').removeClass('n-page-next').removeClass('n-page-prev');
 		currentPage.addClass('n-page-on');
 		if (page > 0) {
@@ -350,7 +365,7 @@
 					// console.log ('saved course history');
 					// console.log (courseHistoryString);
 				} catch (err) {
-					console.log (err);
+					// console.log (err);
 				}
 				// update the course session title list
 				sessionTitleEle = $('#session-title-'+courseStatus.courseId+'-'+courseStatus.currentSession);
@@ -484,9 +499,10 @@
 			var k = window.location.href;
 			if (k.indexOf('course=')>=0) {
 				k = k.replace(/course=[^&]+/g,'course='+id);
-				window.history.pushState(null, null, k);
+				trackUrl(k);
 			} else {
 	        	window.history.pushState(null, null, gAppRoot + '&course=' + id);
+	        	trackUrl(gAppRoot + '&course=' + id);
 	    	}
 		}
 	}
@@ -656,15 +672,15 @@
 		);
 
 		// update the url to display 
-		if (historyAPI() === true) {
-			var k = window.location.href;
-			if (k.indexOf('session=')>=0) {
-				k = k.replace(/session=[^&]+/g,'session='+sessionId);
-				window.history.pushState(null, null, k);
-			} else {
-	        	window.history.pushState(null, null, gAppRoot + '&course=' + courseStatus.courseId + '&session=' + sessionId);
-	    	}
-		}
+		// if (historyAPI() === true) {
+		// 	var k = window.location.href;
+		// 	if (k.indexOf('session=')>=0) {
+		// 		k = k.replace(/session=[^&]+/g,'session='+sessionId);
+		// 		trackUrl(k);
+		// 	} else {
+		// 		trackUrl(gAppRoot + '&course=' + courseStatus.courseId + '&session=' + sessionId);
+	 //    	}
+		// }
 	}
 
 	function getNextSession (data, id) {
@@ -995,6 +1011,9 @@
 
 	document.getElementById('n-header-title').innerHTML = getCaption('appTitle'); 
 	document.getElementById('n-header__back').innerHTML = getCaption('back');
+
+	// track app launch
+	ga('send','event','WO', 'Launch', '');
 
 	//prevent default scrolling
 	document.addEventListener('touchmove', function(event){
